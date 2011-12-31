@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>CloudVIM</title>
+		<style type="text/css">
+			body {
+				padding-top: 30px;
+				font-size: 14px;
+				font-family: "Courier New";
+				color: white;
+				font-weight: 700;
+				background-color: #1F1F1F;
+			}
+			tr {
+				position: relative;
+			}
+			td {
+				float: left;
+				display: inline-block;
+				margin: 0px 1px;
+				padding: 0px;
+				min-width: 8px;
+				min-height: 18px;
+				text-align: center;
+			}
+			ul#menu {
+				background-color: black;
+				top: 0px;
+				left: 0px;
+				width: 100%;
+				position: fixed;
+				border-bottom: solid 1px white;
+				margin: 0px 0px 10px 0px;
+				padding: 2px;
+			}
+			ul.number {
+				float: left;
+				list-style-type: none;
+				margin: 0px 20px 0px 5px;
+				padding: 0px;
+				color: yellow;
+			}
+			ul.number li {
+				padding: 3px 0px 1px 0px;
+				margin: 0px 0px;
+			}
+				
+			#menu li {
+				display: inline-block;
+				border: double 1px white;
+				height: 30px;
+				width: 50px;
+			}
+			.flash {
+				background-color: white;
+				color: black;
+			}
+			img.thumb {
+				height: 200px;
+				width: 200px;
+			}
+			#notice-wrap {
+				z-index: 999;
+				position: fixed;
+				width: 100%;
+				height: 30px;
+				line-height: 30px;
+				margin: 0px;
+				top: -150px;
+				text-align: center;
+				-webkit-transition: top linear 0.7s;
+				-moz-transition: top linear 0.7s;
+			}
+			#notice {
+				width: 400px;
+				margin: 0px auto;
+				color: black;
+				background-color: yellow;
+			}
+			#status {
+				position: fixed;
+				bottom: 0px;
+				left: 0px;
+				width: 100%;
+				background-color: black;
+				height: 30px;
+			}
+		</style>
+	</head>
+	<body>
+		<p style="z-index:99;position:absolute;top:0px;right: 10px;">Not support IE, use FF4 or chrome.(Available: j,h,k,l,r,p/P,o/O,dd,dw,i,a,yy,x,0-9,$,w,b,G,:o,:w)</p>
+		<ul id="menu">
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+		</ul>
+		<form id="upload" style="position:absolute;left:-1000px;">
+			<input id="file" type="file" />
+			<input id='fake' type="button" />
+		</form>
+		<p id="list"></p>
+		<table>
+			<tbody id="VIM"></tbody>
+		</table>
+		<hr />
+		<p>E.N.D</p>
+		<div id="notice-wrap">
+		<p id="notice">NOTICE</p>
+		</div>
+		<div id="status">
+		<p id="debug" style="margin:0px;position:absolute;bottom:5px;right:15px">0,0</p>
+		<p id="mode" style="margin:0px;position:absolute;bottom:5px;left:15px">Command Mode</p>
+		</div>
+	</body>
+	<script type="text/javascript" src="vim.js"></script>
+	<script type="text/javascript">
+		var vim=new Vim();
+		vim.init();
+		document.getElementById("file").addEventListener('change',fileHandler,false);
+		function fileHandler(evt) {
+			switch(vim.fileHandle) {
+				case "open":  //open a new file
+					vim.instance.innerHTML="<tr><td END></td></tr>";
+					vim.currentRow=0;
+					vim.currentCol=0;
+					vim.moveCaret(0,0,false);
+					readTextFile(evt);
+					break;
+				case "read": //append content to current file
+					readTextFile(evt);
+					break;
+				default:;
+			}
+		}
+		function readTextFile(evt) {
+			var files=evt.target.files;
+			for(var i=0,f;f=files[i];i++) {
+				var reader=new FileReader();
+				reader.onload=(function(theFile) {
+						return function(e) {
+						vim.read(e.target.result);
+						};
+						})(f);
+				reader.readAsText(f,"utf-8");
+			}
+		}
+		function addImage(evt) {
+			var files=evt.target.files;
+			for(var i=0,f;f=files[i];i++) {
+				if(!f.type.match('image.*')) {
+					continue;
+				}
+				var reader=new FileReader();
+				reader.onload=(function(theFile) {
+						return function(e) {
+						var span=document.createElement('span');
+						span.innerHTML=['<img class="thumb" src="',e.target.result,'"title="',theFile.name,'"/>'].join('');
+						document.getElementById('list').insertBefore(span,null);
+						};
+						})(f);
+				reader.readAsDataURL(f);
+			}
+		}
+	</script>
+</html>
